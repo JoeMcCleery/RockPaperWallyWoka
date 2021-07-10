@@ -89,8 +89,8 @@ public class PlayerManager : MonoBehaviour
         int randOption = Random.Range(1, 4);
         for (int i = 0; i < Players.Count; i++)
         {
-            Players[i].ui.SetOption(randOption);
-            Players[i].ui.UpdateImage();
+            Players[i].ui.SetOption(1); // default to rock for now
+            //Players[i].ui.UpdateImage();
         }
     }
 

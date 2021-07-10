@@ -451,6 +451,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8573324219025639177}
   - component: {fileID: 8573324219025639176}
+  - component: {fileID: 8768295860870386504}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -502,7 +503,7 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8573324220029212729}
+      - m_Target: {fileID: 8768295860870386504}
         m_TargetAssemblyTypeName: PlayerUI, Assembly-CSharp
         m_MethodName: SetOption
         m_Mode: 3
@@ -518,7 +519,7 @@ MonoBehaviour:
     m_ActionName: Player/Rock[/Keyboard/1]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8573324220029212729}
+      - m_Target: {fileID: 8768295860870386504}
         m_TargetAssemblyTypeName: PlayerUI, Assembly-CSharp
         m_MethodName: SetOption
         m_Mode: 3
@@ -534,7 +535,7 @@ MonoBehaviour:
     m_ActionName: Player/Paper[/Keyboard/2]
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8573324220029212729}
+      - m_Target: {fileID: 8768295860870386504}
         m_TargetAssemblyTypeName: PlayerUI, Assembly-CSharp
         m_MethodName: SetOption
         m_Mode: 3
@@ -597,6 +598,30 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &8768295860870386504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8573324219025639179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c1433c8d65042c43a5059ac74b16298, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerInput: {fileID: 8573324219025639176}
+  _option: 3
+  _image: {fileID: 8573324219464263075}
+  _health: {fileID: 8573324218813676912}
+  _damagedFX: {fileID: 8272386465828903349}
+  _optionSelectFX: {fileID: 3381511066887393504}
+  _text: {fileID: 3182053965654502702}
+  _sprites:
+  - {fileID: 21300000, guid: 59e18f0c77b00f14f95c6fae712b5875, type: 3}
+  - {fileID: 21300000, guid: c12b994f49c040f42a39e1b17ebf5ab9, type: 3}
+  - {fileID: 21300000, guid: dc192f2347aa5ac418359dede02ee4e4, type: 3}
+  - {fileID: 21300000, guid: 0a4271073496bd946bc2c18ca910f274, type: 3}
 --- !u!1 &8573324219339141216
 GameObject:
   m_ObjectHideFlags: 0
@@ -870,7 +895,6 @@ GameObject:
   - component: {fileID: 8573324220029212728}
   - component: {fileID: 8573324220029212731}
   - component: {fileID: 8573324220029212730}
-  - component: {fileID: 8573324220029212729}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -961,26 +985,3 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &8573324220029212729
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8573324220029212708}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c1433c8d65042c43a5059ac74b16298, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _option: 3
-  _image: {fileID: 8573324219464263075}
-  _health: {fileID: 8573324218813676912}
-  _damagedFX: {fileID: 8272386465828903349}
-  _optionSelectFX: {fileID: 3381511066887393504}
-  _text: {fileID: 3182053965654502702}
-  _sprites:
-  - {fileID: 21300000, guid: 59e18f0c77b00f14f95c6fae712b5875, type: 3}
-  - {fileID: 21300000, guid: c12b994f49c040f42a39e1b17ebf5ab9, type: 3}
-  - {fileID: 21300000, guid: dc192f2347aa5ac418359dede02ee4e4, type: 3}
-  - {fileID: 21300000, guid: 0a4271073496bd946bc2c18ca910f274, type: 3}
