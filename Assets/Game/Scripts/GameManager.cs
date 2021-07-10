@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -25,6 +26,9 @@ public class GameManager : MonoBehaviour
 
     private bool _playRound;
     private bool _playRevealRound;
+
+    [SerializeField]
+    private TextMeshProUGUI _instructionsText;
 
     private void Start()
     {
@@ -68,12 +72,14 @@ public class GameManager : MonoBehaviour
         _playRound = false;
         PlayerManager.instance.UpdatePlayerImages();
         _playRevealRound = true;
+        _instructionsText.text = "Reveal";
     }
 
     private void RoundRevealTimerEnded()
     {
         Debug.Log("Round " + _currentRound.ToString() + " has ended.");
         _playRevealRound = false;
+        _instructionsText.text = "";
         PlayerManager.instance.UpdatePlayerImages();
         UpdateScores();
         var alivePlayers = PlayerManager.instance.GetAlivePlayers();
@@ -163,8 +169,10 @@ public class GameManager : MonoBehaviour
     {
         this.StopAllCoroutines();
 
+        PlayerManager.instance.ResetPlayers();
         _playRound = false;
         _playRevealRound = false;
+        _instructionsText.text = "";
         _roundTimer.value = 0f;
         _roundRevealTimer.value = 0f;
         _currentRound = 0;
@@ -179,7 +187,6 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
-        PlayerManager.instance.ResetPlayers();
         StartRoundAfterDelay();
     }
 
@@ -199,8 +206,9 @@ public class GameManager : MonoBehaviour
     private void StartRound()
     {
         PlayerManager.instance.ResetPlayerOptions();
-        PlayerManager.instance.SeRandomPlayerOptionsWithoutShowing();
+        PlayerManager.instance.SetRandomPlayerOptionsWithoutShowing();
         _playRound = true;
+        _instructionsText.text = "Choose";
         _playRevealRound = false;
         _roundTimer.value = 0f;
         _roundRevealTimer.value = 0f;

@@ -27,13 +27,45 @@ public class PlayerUI : MonoBehaviour
     [SerializeField]
     private Sprite[] _sprites;
 
+    public void OnRock(InputValue value)
+    {
+        if(value.isPressed)
+        {
+            SetOption(1);
+        }
+    }
+
+    public void OnPaper(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            SetOption(2);
+        }
+    }
+
+    public void OnScissors(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            SetOption(3);
+        }
+    }
+
+    public void OnUse(InputValue value)
+    {
+        if (value.isPressed && IsAlive())
+        {
+            _optionSelectFX.Play(); // Fake setting option
+        }
+    }
+
     public void SetOption(int option)
     {
-        _option = option;
-        if (IsAlive() && option != 0)
+        if (IsAlive() && option != 0 && option != _option)
         {
             _optionSelectFX.Play();
         }
+        _option = option;
     }
 
     public void UpdateImage()

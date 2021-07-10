@@ -34,9 +34,11 @@ public class PlayerManager : MonoBehaviour
     {
         Debug.Log("Total Players: " + _inputManager.playerCount.ToString());
         Debug.Log("Player Joined: " + playerInput.playerIndex.ToString());
+        var playerUI = playerInput.GetComponentInChildren<PlayerUI>();
+        playerUI.SetPlayerID(playerInput.playerIndex);
         Players.Insert(playerInput.playerIndex, new PlayerComponents {
             gameObject = playerInput.gameObject,
-            ui = playerInput.GetComponentInChildren<PlayerUI>()
+            ui = playerUI
         });
         PlayerSetup();
     }
@@ -51,12 +53,16 @@ public class PlayerManager : MonoBehaviour
 
     private void PlayerSetup()
     {
-        // Set Player Postions
-        for(int i = 0; i < Players.Count; i++)
+        // Set Player vars
+        for (int i = 0; i < Players.Count; i++)
         {
+            // Set position
             float angle = i * Mathf.PI * 2f / Players.Count + Mathf.Deg2Rad * 90f;
             Vector3 spawnPos = new Vector3(Mathf.Cos(angle) * 3f, 0f, Mathf.Sin(angle) * 3f) + this.transform.position;
             Players[i].gameObject.transform.position = spawnPos;
+
+            // Set ID
+            Players[i].ui.SetPlayerID(i + 1);
         }
 
         // Get game ready to start if there are enough players
@@ -84,7 +90,7 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    public void SeRandomPlayerOptionsWithoutShowing()
+    public void SetRandomPlayerOptionsWithoutShowing()
     {
         int randOption = Random.Range(1, 4);
         for (int i = 0; i < Players.Count; i++)
@@ -99,7 +105,6 @@ public class PlayerManager : MonoBehaviour
         for (int i = 0; i < Players.Count; i++)
         {
             Players[i].ui.ResetUI();
-            Players[i].ui.SetPlayerID(i + 1);
         }
     }
 
