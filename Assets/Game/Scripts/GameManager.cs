@@ -13,13 +13,18 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float _roundDuration;
     [SerializeField]
+    private float _roundRevealDuration;
+    [SerializeField]
     private float _roundDelay;
     [SerializeField]
-    private float _resetDelay;
-    [SerializeField]
     private Slider _roundTimer;
+    [SerializeField]
+    private Slider _roundRevealTimer;
+    [SerializeField]
+    private GameSettings _gameSettings;
 
     private bool _playRound;
+    private bool _playRevealRound;
 
     private void Start()
     {
@@ -44,12 +49,31 @@ public class GameManager : MonoBehaviour
             }
             _roundTimer.value = val;
         }
+        else if(_playRevealRound)
+        {
+            var val = Time.deltaTime / _roundRevealDuration;
+            val += _roundRevealTimer.value;
+            if (val >= 1f)
+            {
+                RoundRevealTimerEnded();
+                val = 1f;
+            }
+            _roundRevealTimer.value = val;
+            PlayerManager.instance.UpdatePlayerImages();
+        }
     }
 
     private void RoundTimerEnded()
     {
-        Debug.Log("Round " + _currentRound.ToString() + " has ended.");
         _playRound = false;
+        PlayerManager.instance.UpdatePlayerImages();
+        _playRevealRound = true;
+    }
+
+    private void RoundRevealTimerEnded()
+    {
+        Debug.Log("Round " + _currentRound.ToString() + " has ended.");
+        _playRevealRound = false;
         PlayerManager.instance.UpdatePlayerImages();
         UpdateScores();
         var alivePlayers = PlayerManager.instance.GetAlivePlayers();
@@ -139,22 +163,18 @@ public class GameManager : MonoBehaviour
     {
         this.StopAllCoroutines();
 
-        ResetGameAfterDelay();
-    }
-
-    public void ResetGameAfterDelay()
-    {
-        this.StopAllCoroutines();
         _playRound = false;
-        StartCoroutine(ResetGameCoroutine());
+        _playRevealRound = false;
+        _roundTimer.value = 0f;
+        _roundRevealTimer.value = 0f;
+        _currentRound = 0;
+
+        ShowSettings();
     }
 
-    private IEnumerator ResetGameCoroutine()
+    public void ShowSettings()
     {
-        yield return new WaitForSeconds(_resetDelay);
-        _roundTimer.value = 0f;
-        _currentRound = 0;
-        StartGame();
+        _gameSettings.EnableSettings(true);
     }
 
     public void StartGame()
@@ -163,7 +183,7 @@ public class GameManager : MonoBehaviour
         StartRoundAfterDelay();
     }
 
-    public void StartRoundAfterDelay()
+    private void StartRoundAfterDelay()
     {
         this.StopAllCoroutines();
 
@@ -181,7 +201,9 @@ public class GameManager : MonoBehaviour
         PlayerManager.instance.ResetPlayerOptions();
         PlayerManager.instance.SeRandomPlayerOptionsWithoutShowing();
         _playRound = true;
+        _playRevealRound = false;
         _roundTimer.value = 0f;
+        _roundRevealTimer.value = 0f;
         _currentRound++;
         Debug.Log("Round " + _currentRound.ToString() + " has started.");
     }

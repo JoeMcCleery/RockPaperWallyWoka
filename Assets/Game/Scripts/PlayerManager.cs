@@ -8,24 +8,6 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager instance;
 
     [System.Serializable]
-    public class PlayerPositions
-    {
-        public List<Transform> positions;
-
-        public Transform this[int key]
-        {
-            get
-            {
-                return positions[key];
-            }
-            set
-            {
-                positions[key] = value;
-            }
-        }
-    }
-
-    [System.Serializable]
     public class PlayerComponents
     {
         public GameObject gameObject;
@@ -34,8 +16,6 @@ public class PlayerManager : MonoBehaviour
 
     [SerializeField]
     private PlayerInputManager _inputManager;
-    [SerializeField]
-    private List<PlayerPositions> _playerPositions = new List<PlayerPositions>();
 
     public List<PlayerComponents> Players = new List<PlayerComponents>();
 
@@ -74,13 +54,16 @@ public class PlayerManager : MonoBehaviour
         // Set Player Postions
         for(int i = 0; i < Players.Count; i++)
         {
-            Players[i].gameObject.transform.position = _playerPositions[Players.Count - 1][i].position;
+            float angle = i * Mathf.PI * 2f / Players.Count + Mathf.Deg2Rad * 90f;
+            Vector3 spawnPos = new Vector3(Mathf.Cos(angle) * 3f, 0f, Mathf.Sin(angle) * 3f) + this.transform.position;
+            Players[i].gameObject.transform.position = spawnPos;
         }
 
-        // Start the game if there are enough players
+        // Get game ready to start if there are enough players
         if (Players.Count > 1)
         {
-            GameManager.instance.StartGame();
+            GameManager.instance.ResetGame();
+            GameManager.instance.ShowSettings();
         }
     }
 
@@ -103,9 +86,11 @@ public class PlayerManager : MonoBehaviour
 
     public void SeRandomPlayerOptionsWithoutShowing()
     {
+        int randOption = Random.Range(1, 4);
         for (int i = 0; i < Players.Count; i++)
         {
-            Players[i].ui.SetOption(1); // default to rock
+            Players[i].ui.SetOption(randOption);
+            Players[i].ui.UpdateImage();
         }
     }
 
@@ -114,6 +99,7 @@ public class PlayerManager : MonoBehaviour
         for (int i = 0; i < Players.Count; i++)
         {
             Players[i].ui.ResetUI();
+            Players[i].ui.SetPlayerID(i + 1);
         }
     }
 
