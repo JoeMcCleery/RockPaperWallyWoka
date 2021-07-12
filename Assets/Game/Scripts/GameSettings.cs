@@ -7,9 +7,12 @@ using UnityEngine.VFX;
 
 public class GameSettings : MonoBehaviour
 {
-    public int rounds = 3;
     [SerializeField]
-    private TextMeshProUGUI _roundsText;
+    private NumberInputUI _healthInput;
+    [SerializeField]
+    private NumberInputUI _roundInput;
+    [SerializeField]
+    private NumberInputUI _revealInput;
 
     public void EnableSettings(bool enable)
     {
@@ -19,29 +22,25 @@ public class GameSettings : MonoBehaviour
     public void StartGame()
     {
         if(PlayerManager.instance.GetAlivePlayers().Count < 1) { return; }
-        GameManager.instance.numRounds = rounds;
+        GameManager.instance.health = GetHealth();
+        GameManager.instance.roundDuration = GetRoundDuration();
+        GameManager.instance.roundRevealDuration = GetRevealDuration();
         GameManager.instance.StartGame();
         EnableSettings(false);
     }
 
-    public void AddRound()
+    public int GetHealth()
     {
-        rounds++;
-        UpdateText();
+        return (int)_healthInput.value;
     }
 
-    public void RemoveRound()
+    public float GetRoundDuration()
     {
-        rounds--;
-        if(rounds < 1)
-        {
-            rounds = 1;
-        }
-        UpdateText();
+        return _roundInput.value;
     }
 
-    private void UpdateText()
+    public float GetRevealDuration()
     {
-        _roundsText.text = rounds.ToString();
+        return _revealInput.value;
     }
 }

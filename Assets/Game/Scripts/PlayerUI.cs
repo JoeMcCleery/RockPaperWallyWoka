@@ -11,6 +11,8 @@ public class PlayerUI : MonoBehaviour
     public int selectedOption { get { return _option; } }
 
     [SerializeField]
+    private Sprite[] _sprites;
+    [SerializeField]
     private PlayerInput _playerInput;
     [SerializeField]
     private int _option;
@@ -23,9 +25,13 @@ public class PlayerUI : MonoBehaviour
     [SerializeField]
     private VisualEffect _optionSelectFX;
     [SerializeField]
-    private TextMeshProUGUI _text;
+    private TextMeshProUGUI _playerIDText;
     [SerializeField]
-    private Sprite[] _sprites;
+    private RoundDamage _roundDamage;
+    [SerializeField]
+    private GameObject _crown;
+
+    private int _playerID;
 
     public void OnRock(InputValue value)
     {
@@ -55,17 +61,19 @@ public class PlayerUI : MonoBehaviour
     {
         if (value.isPressed && IsAlive())
         {
-            _optionSelectFX.Play(); // Fake setting option
+            SetOption(-1); // Play selct option fx without changing selected option
         }
     }
 
     public void SetOption(int option)
     {
-        if (IsAlive() && option != 0 && option != _option)
+        if (GameManager.instance.PlayingRound() && IsAlive() && option != 0 && option != _option)
         {
             _optionSelectFX.Play();
+            StartCoroutine(PlayerRumble(0.2f, 0.75f, 0.04f));
         }
-        _option = option;
+
+        _option = option >= 0 ? option : _option;
     }
 
     public void UpdateImage()
@@ -77,16 +85,22 @@ public class PlayerUI : MonoBehaviour
         _image.sprite = _sprites[_option];
     }
     
-    public void LoseHealth()
+    public void LoseHealth(int damage = 1)
     {
-        _health.value -= 1.001f / GameManager.instance.numRounds;
+        if(damage < 1) { return; }
+        _health.value -= (float)damage / (float)GameManager.instance.health;
         _damagedFX.Play();
-        StartCoroutine(PlayerRumble(0.5f, 0.3f, 0.2f));
+        StartCoroutine(PlayerRumble(0.75f, 0.2f, 0.3f));
         if (_health.value <= 0f)
         {
             _health.value = 0f;
             UpdateImage();
         }
+    }
+
+    public void UpdateDamageUI(int damage)
+    {
+        _roundDamage.SetDamage(damage);
     }
 
     private IEnumerator PlayerRumble(float low, float high, float duration)
@@ -104,9 +118,9 @@ public class PlayerUI : MonoBehaviour
 
     public void ResetUI()
     {
-        _health.value = 1f;
-        _option = 0;
-        _image.sprite = _sprites[0];
+        _health.value = 0.999999f; // Avoid rounding errors preventing player health to go to 0 on the last hit
+        SetOption(0);
+        UpdateImage();
     }
 
     public bool IsAlive()
@@ -116,7 +130,13 @@ public class PlayerUI : MonoBehaviour
 
     public void SetPlayerID(int id)
     {
-        _text.text = id.ToString();
+        _playerID = id;
+        _playerIDText.text = _playerID.ToString();
+    }
+
+    public int GetPlayerID()
+    {
+        return _playerID;
     }
 
     private Gamepad PlayerGamepad()
@@ -132,5 +152,10 @@ public class PlayerUI : MonoBehaviour
         }
 
         return null;
+    }
+
+    public void ShowCrown(bool show)
+    {
+        _crown.SetActive(show);
     }
 }

@@ -17,6 +17,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private PlayerInputManager _inputManager;
 
+    [HideInInspector]
     public List<PlayerComponents> Players = new List<PlayerComponents>();
 
     private void Start()
@@ -57,8 +58,9 @@ public class PlayerManager : MonoBehaviour
         for (int i = 0; i < Players.Count; i++)
         {
             // Set position
+            float radius = 2f + Players.Count / 8;
             float angle = i * Mathf.PI * 2f / Players.Count + Mathf.Deg2Rad * 90f;
-            Vector3 spawnPos = new Vector3(Mathf.Cos(angle) * 3f, 0f, Mathf.Sin(angle) * 3f) + this.transform.position;
+            Vector3 spawnPos = new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius) + this.transform.position;
             Players[i].gameObject.transform.position = spawnPos;
 
             // Set ID
@@ -87,16 +89,19 @@ public class PlayerManager : MonoBehaviour
         {
             Players[i].ui.SetOption(0);
             Players[i].ui.UpdateImage();
+            Players[i].ui.UpdateDamageUI(0);
         }
     }
 
-    public void SetRandomPlayerOptionsWithoutShowing()
+    public void SetDefaultOption(bool random = false)
     {
-        int randOption = Random.Range(1, 4);
+        int defaultOption = random ? Random.Range(1, 4) : 1; // use random or default to rock
         for (int i = 0; i < Players.Count; i++)
         {
-            Players[i].ui.SetOption(1); // default to rock for now
-            //Players[i].ui.UpdateImage();
+            if(Players[i].ui.selectedOption == 0)
+            {
+                Players[i].ui.SetOption(defaultOption);
+            }
         }
     }
 
@@ -119,5 +124,13 @@ public class PlayerManager : MonoBehaviour
             }
         }
         return alivePlayers;
+    }
+
+    public void SetRoundWinner(int playerID)
+    {
+        for (int i = 0; i < Players.Count; i++)
+        {
+            Players[i].ui.ShowCrown(Players[i].ui.GetPlayerID() == playerID);
+        }
     }
 }

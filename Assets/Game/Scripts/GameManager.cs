@@ -8,15 +8,19 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
+    [HideInInspector]
+    public int health;
+    [HideInInspector]
+    public float roundDuration;
+    [HideInInspector]
+    public float roundRevealDuration;
 
-    public int numRounds;
-    private int _currentRound = 0;
-    [SerializeField]
-    private float _roundDuration;
-    [SerializeField]
-    private float _roundRevealDuration;
     [SerializeField]
     private float _roundDelay;
+    private double _roundStartTime;
+    private float _totalRoundDuration;
+    private double _roundEndTime;
+    private int _currentRound = 0;
     [SerializeField]
     private Slider _roundTimer;
     [SerializeField]
@@ -38,13 +42,15 @@ public class GameManager : MonoBehaviour
         }
 
         instance = this;
+
+        health = _gameSettings.GetHealth();
     }
 
     void Update()
     {
         if (_playRound)
         {
-            var val = Time.deltaTime / _roundDuration;
+            var val = Time.deltaTime / roundDuration;
             val += _roundTimer.value;
             if (val >= 1f)
             {
@@ -53,9 +59,9 @@ public class GameManager : MonoBehaviour
             }
             _roundTimer.value = val;
         }
-        else if(_playRevealRound)
+        else if (_playRevealRound)
         {
-            var val = Time.deltaTime / _roundRevealDuration;
+            var val = Time.deltaTime / roundRevealDuration;
             val += _roundRevealTimer.value;
             if (val >= 1f)
             {
@@ -64,28 +70,48 @@ public class GameManager : MonoBehaviour
             }
             _roundRevealTimer.value = val;
             PlayerManager.instance.UpdatePlayerImages();
+            var Damages = GetRoundDamages();
+            for (int i = 0; i < Damages.Length; i++)
+            {
+                PlayerManager.instance.Players[i].ui.UpdateDamageUI(Damages[i]);
+            }
         }
+        if(_playRound || _playRevealRound)
+        {
+            _instructionsText.text = ((int)((_roundEndTime - Time.realtimeSinceStartupAsDouble) / _totalRoundDuration * 3f) + 1).ToString();
+        }
+    }
+
+    public bool PlayingRound()
+    {
+        return _playRound || _playRevealRound;
     }
 
     private void RoundTimerEnded()
     {
         _playRound = false;
-        PlayerManager.instance.UpdatePlayerImages();
         _playRevealRound = true;
-        _instructionsText.text = "Reveal";
+        PlayerManager.instance.SetDefaultOption(); // Set a default option if none selected
+        PlayerManager.instance.UpdatePlayerImages();
     }
 
     private void RoundRevealTimerEnded()
     {
         Debug.Log("Round " + _currentRound.ToString() + " has ended.");
+        _playRound = false;
         _playRevealRound = false;
         _instructionsText.text = "";
         PlayerManager.instance.UpdatePlayerImages();
-        UpdateScores();
+        var Damages = GetRoundDamages();
+        for (int i = 0; i < Damages.Length; i++)
+        {
+            PlayerManager.instance.Players[i].ui.LoseHealth(Damages[i]);
+        }
         var alivePlayers = PlayerManager.instance.GetAlivePlayers();
         Debug.Log(alivePlayers.Count);
         if (alivePlayers.Count <= 1)
         {
+            PlayerManager.instance.SetRoundWinner(alivePlayers.Count == 1 ? alivePlayers[0].ui.GetPlayerID() : -1);
             ResetGame();
             return;
         }
@@ -93,9 +119,10 @@ public class GameManager : MonoBehaviour
         StartRoundAfterDelay();
     }
 
-    public void UpdateScores()
+    public int[] GetRoundDamages()
     {
         var Players = PlayerManager.instance.Players;
+        int[] Damages = new int[Players.Count];
         for (int i = 0; i < Players.Count; i++)
         {
             for (int j = 0; j < Players.Count; j++)
@@ -117,7 +144,7 @@ public class GameManager : MonoBehaviour
                                 break;
                             case 2: // Paper
                                 // Lose
-                                Players[i].ui.LoseHealth();
+                                Damages[i]++;
                                 break;
                             case 3: // Scissors
                                 // Win
@@ -138,7 +165,7 @@ public class GameManager : MonoBehaviour
                                 break;
                             case 3: // Scissors
                                 // Lose
-                                Players[i].ui.LoseHealth();
+                                Damages[i]++;
                                 break;
                         }
                         break;
@@ -150,7 +177,7 @@ public class GameManager : MonoBehaviour
                                 break;
                             case 1: // Rock
                                 // Lose
-                                Players[i].ui.LoseHealth();
+                                Damages[i]++;
                                 break;
                             case 2: // Paper
                                 // Win
@@ -163,6 +190,7 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+        return Damages;
     }
 
     public void ResetGame()
@@ -206,10 +234,11 @@ public class GameManager : MonoBehaviour
     private void StartRound()
     {
         PlayerManager.instance.ResetPlayerOptions();
-        PlayerManager.instance.SetRandomPlayerOptionsWithoutShowing();
         _playRound = true;
-        _instructionsText.text = "Choose";
         _playRevealRound = false;
+        _roundStartTime = Time.realtimeSinceStartupAsDouble;
+        _totalRoundDuration = roundDuration + roundRevealDuration;
+        _roundEndTime = _roundStartTime + _totalRoundDuration;
         _roundTimer.value = 0f;
         _roundRevealTimer.value = 0f;
         _currentRound++;
