@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour
     private bool _playRevealRound;
 
     [SerializeField]
-    private TextMeshProUGUI _instructionsText;
+    private TextMeshProUGUI _countDownText;
 
     private void Start()
     {
@@ -78,7 +78,7 @@ public class GameManager : MonoBehaviour
         }
         if(_playRound || _playRevealRound)
         {
-            _instructionsText.text = ((int)((_roundEndTime - Time.realtimeSinceStartupAsDouble) / _totalRoundDuration * 3f) + 1).ToString();
+            _countDownText.text = ((int)((_roundEndTime - Time.realtimeSinceStartupAsDouble) / _totalRoundDuration * 3f) + 1).ToString();
         }
     }
 
@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("Round " + _currentRound.ToString() + " has ended.");
         _playRound = false;
         _playRevealRound = false;
-        _instructionsText.text = "";
+        _countDownText.text = "";
         PlayerManager.instance.UpdatePlayerImages();
         var Damages = GetRoundDamages();
         for (int i = 0; i < Damages.Length; i++)
@@ -200,7 +200,7 @@ public class GameManager : MonoBehaviour
         PlayerManager.instance.ResetPlayers();
         _playRound = false;
         _playRevealRound = false;
-        _instructionsText.text = "";
+        _countDownText.text = "";
         _roundTimer.value = 0f;
         _roundRevealTimer.value = 0f;
         _currentRound = 0;

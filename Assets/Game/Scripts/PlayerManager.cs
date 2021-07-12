@@ -58,7 +58,7 @@ public class PlayerManager : MonoBehaviour
         for (int i = 0; i < Players.Count; i++)
         {
             // Set position
-            float radius = 2f + Players.Count / 8;
+            float radius = 2.5f + 0.5f * Players.Count / 8;
             float angle = i * Mathf.PI * 2f / Players.Count + Mathf.Deg2Rad * 90f;
             Vector3 spawnPos = new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius) + this.transform.position;
             Players[i].gameObject.transform.position = spawnPos;
