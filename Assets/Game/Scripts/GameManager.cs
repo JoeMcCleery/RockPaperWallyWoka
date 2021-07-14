@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviour
     public float roundDuration;
     [HideInInspector]
     public float roundRevealDuration;
+    [HideInInspector]
+    public bool showRoundDamage;
 
     [SerializeField]
     private float _roundDelay;
@@ -73,7 +75,7 @@ public class GameManager : MonoBehaviour
             var Damages = GetRoundDamages();
             for (int i = 0; i < Damages.Length; i++)
             {
-                PlayerManager.instance.Players[i].ui.UpdateDamageUI(Damages[i]);
+                PlayerManager.instance.Players[i].ui.UpdateDamageUI(showRoundDamage ? Damages[i] : 0);
             }
         }
         if(_playRound || _playRevealRound)

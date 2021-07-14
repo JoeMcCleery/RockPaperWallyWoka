@@ -13,6 +13,8 @@ public class GameSettings : MonoBehaviour
     private NumberInputUI _roundInput;
     [SerializeField]
     private NumberInputUI _revealInput;
+    [SerializeField]
+    private Toggle _damageIndicatorInput;
 
     public void EnableSettings(bool enable)
     {
@@ -25,6 +27,7 @@ public class GameSettings : MonoBehaviour
         GameManager.instance.health = GetHealth();
         GameManager.instance.roundDuration = GetRoundDuration();
         GameManager.instance.roundRevealDuration = GetRevealDuration();
+        GameManager.instance.showRoundDamage = GetShowDamageIndicator();
         GameManager.instance.StartGame();
         EnableSettings(false);
     }
@@ -42,5 +45,10 @@ public class GameSettings : MonoBehaviour
     public float GetRevealDuration()
     {
         return _revealInput.value;
+    }
+
+    public bool GetShowDamageIndicator()
+    {
+        return _damageIndicatorInput.isOn;
     }
 }

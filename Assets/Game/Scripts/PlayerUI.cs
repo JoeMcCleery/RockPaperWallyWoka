@@ -70,7 +70,7 @@ public class PlayerUI : MonoBehaviour
         if (GameManager.instance.PlayingRound() && IsAlive() && option != 0 && option != _option)
         {
             _optionSelectFX.Play();
-            StartCoroutine(PlayerRumble(0.2f, 0.95f, 0.065f));
+            StartCoroutine(PlayerRumble(0.2f, 0.95f, 0.05f));
         }
 
         _option = option >= 0 ? option : _option;
@@ -90,7 +90,7 @@ public class PlayerUI : MonoBehaviour
         if(damage < 1) { return; }
         _health.value -= (float)damage / (float)GameManager.instance.health;
         _damagedFX.Play();
-        StartCoroutine(PlayerRumble(0.85f, 0.95f, 0.7f));
+        StartCoroutine(PlayerRumble(0.85f, 0.95f, 0.3f));
         if (_health.value <= 0f)
         {
             _health.value = 0f;
