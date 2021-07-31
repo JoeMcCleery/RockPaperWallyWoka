@@ -11,6 +11,10 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public int health;
     [HideInInspector]
+    public int wallyWokkaTotal;
+    [HideInInspector]
+    public int wallyWokkaPerRound;
+    [HideInInspector]
     public float roundDuration;
     [HideInInspector]
     public float roundRevealDuration;
@@ -72,15 +76,15 @@ public class GameManager : MonoBehaviour
             }
             _roundRevealTimer.value = val;
             PlayerManager.instance.UpdatePlayerImages();
-            var Damages = GetRoundDamages();
+            var Damages = GetAllRoundDamages();
             for (int i = 0; i < Damages.Length; i++)
             {
                 PlayerManager.instance.Players[i].ui.UpdateDamageUI(showRoundDamage ? Damages[i] : 0);
             }
         }
-        if(_playRound || _playRevealRound)
+        if(PlayingRound())
         {
-            _countDownText.text = ((int)((_roundEndTime - Time.realtimeSinceStartupAsDouble) / _totalRoundDuration * 3f) + 1).ToString();
+            _countDownText.text = ((float)((_roundEndTime - Time.realtimeSinceStartupAsDouble) / _totalRoundDuration * 3f)).ToString("F1");
         }
     }
 
@@ -89,11 +93,16 @@ public class GameManager : MonoBehaviour
         return _playRound || _playRevealRound;
     }
 
+    public bool PlayingRevealRound()
+    {
+        return _playRevealRound;
+    }
+
     private void RoundTimerEnded()
     {
+        PlayerManager.instance.SetDefaultOption(); // Set a default option if none selected
         _playRound = false;
         _playRevealRound = true;
-        PlayerManager.instance.SetDefaultOption(); // Set a default option if none selected
         PlayerManager.instance.UpdatePlayerImages();
     }
 
@@ -104,7 +113,7 @@ public class GameManager : MonoBehaviour
         _playRevealRound = false;
         _countDownText.text = "";
         PlayerManager.instance.UpdatePlayerImages();
-        var Damages = GetRoundDamages();
+        var Damages = GetAllRoundDamages();
         for (int i = 0; i < Damages.Length; i++)
         {
             PlayerManager.instance.Players[i].ui.LoseHealth(Damages[i]);
@@ -121,78 +130,161 @@ public class GameManager : MonoBehaviour
         StartRoundAfterDelay();
     }
 
-    public int[] GetRoundDamages()
+    public int[] GetAllRoundDamages()
     {
         var Players = PlayerManager.instance.Players;
         int[] Damages = new int[Players.Count];
         for (int i = 0; i < Players.Count; i++)
         {
-            for (int j = 0; j < Players.Count; j++)
-            {
-                if (i == j) { continue; }
-                switch (Players[i].ui.selectedOption)
-                {
-                    default:
-                    case 0:
-                        break;
-                    case 1: // Rock
-                        switch (Players[j].ui.selectedOption)
-                        {
-                            default:
-                            case 0:
-                                break;
-                            case 1: // Rock
-                                // Draw
-                                break;
-                            case 2: // Paper
-                                // Lose
-                                Damages[i]++;
-                                break;
-                            case 3: // Scissors
-                                // Win
-                                break;
-                        }
-                        break;
-                    case 2: // Paper
-                        switch (Players[j].ui.selectedOption)
-                        {
-                            default:
-                            case 0:
-                                break;
-                            case 1: // Rock
-                                // Win
-                                break;
-                            case 2: // Paper
-                                // Draw
-                                break;
-                            case 3: // Scissors
-                                // Lose
-                                Damages[i]++;
-                                break;
-                        }
-                        break;
-                    case 3: // Scissors
-                        switch (Players[j].ui.selectedOption)
-                        {
-                            default:
-                            case 0:
-                                break;
-                            case 1: // Rock
-                                // Lose
-                                Damages[i]++;
-                                break;
-                            case 2: // Paper
-                                // Win
-                                break;
-                            case 3: // Scissors
-                                // Draw
-                                break;
-                        }
-                        break;
-                }
-            }
+            Damages[i] = CalculateRoundLosses(Players[i].ui.selectedOption, Players[i].ui.GetPlayerID());
         }
         return Damages;
+    }
+
+    public int CalculateRoundLosses(int option, int playerID)
+    {
+        var Players = PlayerManager.instance.Players;
+        int DamageTaken = 0;
+        for (int j = 0; j < Players.Count; j++)
+        {
+            if(Players[j].ui.GetPlayerID() == playerID) { continue; }
+
+            switch (option)
+            {
+                default:
+                case 0:
+                    break;
+                case 1: // Rock
+                    switch (Players[j].ui.selectedOption)
+                    {
+                        default:
+                        case 0:
+                            break;
+                        case 1: // Rock
+                                // Draw
+                            break;
+                        case 2: // Paper
+                                // Lose
+                            DamageTaken++;
+                            break;
+                        case 3: // Scissors
+                                // Win
+                            break;
+                    }
+                    break;
+                case 2: // Paper
+                    switch (Players[j].ui.selectedOption)
+                    {
+                        default:
+                        case 0:
+                            break;
+                        case 1: // Rock
+                                // Win
+                            break;
+                        case 2: // Paper
+                                // Draw
+                            break;
+                        case 3: // Scissors
+                                // Lose
+                            DamageTaken++;
+                            break;
+                    }
+                    break;
+                case 3: // Scissors
+                    switch (Players[j].ui.selectedOption)
+                    {
+                        default:
+                        case 0:
+                            break;
+                        case 1: // Rock
+                                // Lose
+                            DamageTaken++;
+                            break;
+                        case 2: // Paper
+                                // Win
+                            break;
+                        case 3: // Scissors
+                                // Draw
+                            break;
+                    }
+                    break;
+            }
+        }
+       
+        return DamageTaken;
+    }
+
+    public int CalculateRoundWins(int option, int playerID)
+    {
+        var Players = PlayerManager.instance.Players;
+        int DamageDealt = 0;
+        for (int j = 0; j < Players.Count; j++)
+        {
+            if (Players[j].ui.GetPlayerID() == playerID) { continue; }
+
+            switch (option)
+            {
+                default:
+                case 0:
+                    break;
+                case 1: // Rock
+                    switch (Players[j].ui.selectedOption)
+                    {
+                        default:
+                        case 0:
+                            break;
+                        case 1: // Rock
+                                // Draw
+                            break;
+                        case 2: // Paper
+                                // Lose
+                            break;
+                        case 3: // Scissors
+                                // Win
+                            DamageDealt++;
+                            break;
+                    }
+                    break;
+                case 2: // Paper
+                    switch (Players[j].ui.selectedOption)
+                    {
+                        default:
+                        case 0:
+                            break;
+                        case 1: // Rock
+                                // Win
+                            DamageDealt++;
+                            break;
+                        case 2: // Paper
+                                // Draw
+                            break;
+                        case 3: // Scissors
+                                // Lose
+                            break;
+                    }
+                    break;
+                case 3: // Scissors
+                    switch (Players[j].ui.selectedOption)
+                    {
+                        default:
+                        case 0:
+                            break;
+                        case 1: // Rock
+                                // Lose
+                            break;
+                        case 2: // Paper
+                                // Win
+                            DamageDealt++;
+                            break;
+                        case 3: // Scissors
+                                // Draw
+                            break;
+                    }
+                    break;
+            }
+        }
+
+        return DamageDealt;
     }
 
     public void ResetGame()
@@ -235,7 +327,7 @@ public class GameManager : MonoBehaviour
 
     private void StartRound()
     {
-        PlayerManager.instance.ResetPlayerOptions();
+        PlayerManager.instance.PlayerRoundReset();
         _playRound = true;
         _playRevealRound = false;
         _roundStartTime = Time.realtimeSinceStartupAsDouble;

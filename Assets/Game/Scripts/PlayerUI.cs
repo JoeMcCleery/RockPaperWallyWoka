@@ -21,6 +21,10 @@ public class PlayerUI : MonoBehaviour
     [SerializeField]
     private Slider _health;
     [SerializeField]
+    private Slider _wallyWokkaMeter;
+    [SerializeField]
+    private GameObject _wallyWokkaGO;
+    [SerializeField]
     private VisualEffect _damagedFX;
     [SerializeField]
     private VisualEffect _optionSelectFX;
@@ -32,12 +36,13 @@ public class PlayerUI : MonoBehaviour
     private GameObject _crown;
 
     private int _playerID;
+    private int _roundWallyWokkaCount;
 
     public void OnRock(InputValue value)
     {
         if(value.isPressed)
         {
-            SetOption(1);
+            SetOption(1, 1);
         }
     }
 
@@ -45,7 +50,7 @@ public class PlayerUI : MonoBehaviour
     {
         if (value.isPressed)
         {
-            SetOption(2);
+            SetOption(2, 1);
         }
     }
 
@@ -53,7 +58,7 @@ public class PlayerUI : MonoBehaviour
     {
         if (value.isPressed)
         {
-            SetOption(3);
+            SetOption(3, 1);
         }
     }
 
@@ -61,19 +66,49 @@ public class PlayerUI : MonoBehaviour
     {
         if (value.isPressed && IsAlive())
         {
-            SetOption(-1); // Play selct option fx without changing selected option
+            // Default to no change but play FX
+            int bestOption = -1;
+
+            // only allow auto wally wokka during the reveal phase
+            if (GameManager.instance.PlayingRevealRound())
+            {
+                int mostDamage = 0;
+                int tempDamageDealt = 0;
+                for (int o = 1; o <= 3; o++)
+                {
+                    tempDamageDealt = GameManager.instance.CalculateRoundWins(o, GetPlayerID());
+
+                    if (mostDamage < tempDamageDealt)
+                    {
+                        mostDamage = tempDamageDealt;
+                        bestOption = o;
+                    }
+                }
+            }
+
+            SetOption(bestOption, 2);
         }
     }
 
-    public void SetOption(int option)
+    public void SetOption(int option, int cost = 0)
     {
+        bool canChange = true;
+
         if (GameManager.instance.PlayingRound() && IsAlive() && option != 0 && option != _option)
         {
-            _optionSelectFX.Play();
-            StartCoroutine(PlayerRumble(0.2f, 0.95f, 0.05f));
+            if(GameManager.instance.PlayingRevealRound())
+            {
+                canChange = LoseWallyWokka(cost);
+            }
+
+            if(canChange)
+            {
+                _optionSelectFX.Play();
+                StartCoroutine(PlayerRumble(0.2f, 0.95f, 0.05f));
+            }
         }
 
-        _option = option >= 0 ? option : _option;
+        _option = (option >= 0 && canChange) ? option : _option;
     }
 
     public void UpdateImage()
@@ -98,6 +133,21 @@ public class PlayerUI : MonoBehaviour
         }
     }
 
+    public bool LoseWallyWokka(int ammount = 1)
+    {
+        if (ammount < 1 || (_roundWallyWokkaCount >= GameManager.instance.wallyWokkaPerRound && GameManager.instance.wallyWokkaPerRound >= 0) || (_wallyWokkaMeter.value < (float)ammount / (float)GameManager.instance.wallyWokkaTotal && GameManager.instance.wallyWokkaTotal >= 0)) { return false; }
+        if(GameManager.instance.wallyWokkaTotal > 0)
+        {
+            _wallyWokkaMeter.value -= (float)ammount / (float)GameManager.instance.wallyWokkaTotal;
+            if (_wallyWokkaMeter.value <= 0f)
+            {
+                _wallyWokkaMeter.value = 0f;
+            }
+        }
+        _roundWallyWokkaCount++;
+        return true;
+    }
+
     public void UpdateDamageUI(int damage)
     {
         _roundDamage.SetDamage(damage);
@@ -117,9 +167,16 @@ public class PlayerUI : MonoBehaviour
 
     public void ResetUI()
     {
-        _health.value = 0.999999f; // Avoid rounding errors preventing player health to go to 0 on the last hit
+        _health.value = 0.99999f;
+        _wallyWokkaMeter.value = 1f;
+        ResetRoundWallyWokka();
         SetOption(0);
         UpdateImage();
+    }
+
+    public void ResetRoundWallyWokka()
+    {
+        _roundWallyWokkaCount = 0;
     }
 
     public bool IsAlive()
@@ -156,5 +213,10 @@ public class PlayerUI : MonoBehaviour
     public void ShowCrown(bool show)
     {
         _crown.SetActive(show);
+    }
+
+    public void ShowWallyWokka(bool show)
+    {
+        _wallyWokkaGO.SetActive(show);
     }
 }

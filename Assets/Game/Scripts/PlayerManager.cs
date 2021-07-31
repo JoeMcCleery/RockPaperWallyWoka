@@ -83,11 +83,12 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    public void ResetPlayerOptions()
+    public void PlayerRoundReset()
     {
         for (int i = 0; i < Players.Count; i++)
         {
             Players[i].ui.SetOption(0);
+            Players[i].ui.ResetRoundWallyWokka();
             Players[i].ui.UpdateImage();
             Players[i].ui.UpdateDamageUI(0);
         }
@@ -131,6 +132,14 @@ public class PlayerManager : MonoBehaviour
         for (int i = 0; i < Players.Count; i++)
         {
             Players[i].ui.ShowCrown(Players[i].ui.GetPlayerID() == playerID);
+        }
+    }
+
+    public void EnableWallyWokkaUI(bool enable)
+    {
+        for (int i = 0; i < Players.Count; i++)
+        {
+            Players[i].ui.ShowWallyWokka(enable);
         }
     }
 }
