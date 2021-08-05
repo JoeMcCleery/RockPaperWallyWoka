@@ -8,6 +8,8 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
+
+    // Settings
     [HideInInspector]
     public int health;
     [HideInInspector]
@@ -20,11 +22,17 @@ public class GameManager : MonoBehaviour
     public float roundRevealDuration;
     [HideInInspector]
     public bool showRoundDamage;
+    [HideInInspector]
+    public float bonusTimeIncrement;
+    [HideInInspector]
+    public int bonusFalloff;
 
     [SerializeField]
     private float _roundDelay;
     private double _roundStartTime;
     private float _totalRoundDuration;
+    private float _roundBonusTime;
+    private int _roundBonuses;
     private double _roundEndTime;
     private int _currentRound = 0;
     [SerializeField]
@@ -67,8 +75,9 @@ public class GameManager : MonoBehaviour
         }
         else if (_playRevealRound)
         {
-            var val = Time.deltaTime / roundRevealDuration;
-            val += _roundRevealTimer.value;
+            //var val = Time.deltaTime / (roundRevealDuration + _roundBonusTime);
+            //val += _roundRevealTimer.value;
+            var val = 1f - (float)((_roundEndTime - Time.realtimeSinceStartupAsDouble) / (roundRevealDuration + _roundBonusTime));
             if (val >= 1f)
             {
                 RoundRevealTimerEnded();
@@ -84,8 +93,16 @@ public class GameManager : MonoBehaviour
         }
         if(PlayingRound())
         {
-            _countDownText.text = ((float)((_roundEndTime - Time.realtimeSinceStartupAsDouble) / _totalRoundDuration * 3f)).ToString("F1");
+            _countDownText.text = ((float)((_roundEndTime - Time.realtimeSinceStartupAsDouble) / (_totalRoundDuration + _roundBonusTime) * 3f)).ToString("F1");
         }
+    }
+
+    public void AddRoundBonusTime(float bonusTime)
+    {
+        bonusTime *= Mathf.Pow(bonusFalloff, _roundBonuses);
+        _roundBonusTime += bonusTime;
+        _roundEndTime += bonusTime;
+        _roundBonuses++;
     }
 
     public bool PlayingRound()
@@ -331,6 +348,8 @@ public class GameManager : MonoBehaviour
         _playRound = true;
         _playRevealRound = false;
         _roundStartTime = Time.realtimeSinceStartupAsDouble;
+        _roundBonusTime = 0;
+        _roundBonuses = 0;
         _totalRoundDuration = roundDuration + roundRevealDuration;
         _roundEndTime = _roundStartTime + _totalRoundDuration;
         _roundTimer.value = 0f;

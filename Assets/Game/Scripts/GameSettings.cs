@@ -18,6 +18,10 @@ public class GameSettings : MonoBehaviour
     [SerializeField]
     private NumberInputUI _wallyWokkaRoundInput;
     [SerializeField]
+    private NumberInputUI _bonusTimeInput;
+    [SerializeField]
+    private NumberInputUI _bonusFalloffInput;
+    [SerializeField]
     private Toggle _damageIndicatorInput;
 
     public void EnableSettings(bool enable)
@@ -35,6 +39,8 @@ public class GameSettings : MonoBehaviour
         GameManager.instance.showRoundDamage = GetShowDamageIndicator();
         GameManager.instance.wallyWokkaTotal = GetWallyWokkaTotal();
         GameManager.instance.wallyWokkaPerRound = GetWallyWokkaPerRound();
+        GameManager.instance.bonusTimeIncrement = GetBonusTimeIncrement();
+        GameManager.instance.bonusFalloff = GetBonusFalloff();
 
         // Update UI
         PlayerManager.instance.EnableWallyWokkaUI(GetWallyWokkaTotal() > 0 && GetWallyWokkaPerRound() != 0);
@@ -72,5 +78,15 @@ public class GameSettings : MonoBehaviour
     public int GetWallyWokkaPerRound()
     {
         return (int)_wallyWokkaRoundInput.value;
+    }
+
+    public float GetBonusTimeIncrement()
+    {
+        return _bonusTimeInput.value;
+    }
+
+    public int GetBonusFalloff()
+    {
+        return (int)_bonusFalloffInput.value;
     }
 }

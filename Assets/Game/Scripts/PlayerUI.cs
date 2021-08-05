@@ -144,7 +144,10 @@ public class PlayerUI : MonoBehaviour
                 _wallyWokkaMeter.value = 0f;
             }
         }
+        // Add to round total
         _roundWallyWokkaCount++;
+        // Add round bonus time
+        GameManager.instance.AddRoundBonusTime(GameManager.instance.bonusTimeIncrement);
         return true;
     }
 
